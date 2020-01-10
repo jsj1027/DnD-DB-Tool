@@ -1,0 +1,17 @@
+name: dnd-cli
+version: "0.1.0"
+author: Javis Johnson <jsj1027@g.rit.edu>
+about: Dnd character creation CLI app.
+args:
+    - config:
+        short: c
+        long: config
+        value_name: FILE
+        help: Sets a custom config file
+        takes_value: true
+    - new:
+        short: n
+        long: new
+        help: The class you wish your character to have. Uses DND5E classes as a base.
+        value_name: Class
+        takes_value: true
