@@ -1,22 +1,28 @@
 use crate::structs::class::{Class, CLASSES};
 use rusqlite::{Connection, Result};
+
+use serde_json::Value;
+
+use serde::{Deserialize, Serialize};
+
 use std::result::Result as StdResult;
 use std::str::FromStr;
 use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
 use std::time::Duration;
 use std::{error, fmt, thread};
 
+
 #[derive(Debug)]
 pub struct DatabaseConnection {
     pub connection: Connection,
-    pub output_channel: Sender<String>,
-    pub intake_channel: Receiver<String>,
+    pub output_channel: Sender<Value>,
+    pub intake_channel: Receiver<Value>,
 }
 
 impl DatabaseConnection {
-    pub fn new(output_channel: Sender<String>) -> (Self, Sender<String>) {
+    pub fn new(output_channel: Sender<Value>) -> (Self, Sender<Value>) {
         let path = "./data/dnd.db";
-        let (db_output_channel, db_intake_channel): (Sender<String>, Receiver<String>) =
+        let (db_output_channel, db_intake_channel): (Sender<Value>, Receiver<Value>) =
             mpsc::channel();
         let connection = DatabaseConnection {
             connection: connect(&path).unwrap(),
@@ -31,8 +37,9 @@ impl DatabaseConnection {
         while check {
             match self.intake_channel.try_recv() {
                 Ok(message) => {
-                    let message: DbMessage = message.parse().unwrap();
-                    self.parse_action(message);
+                    let message: DbMessage = serde_json::from_value(message).unwrap();
+                    println!("message: {}", message);
+                    // self.parse_action(message);
                 }
                 Err(error) => match error {
                     TryRecvError::Empty => thread::sleep(Duration::from_secs(1)),
@@ -42,12 +49,12 @@ impl DatabaseConnection {
         }
     }
 
-    fn parse_action(&self, message: DbMessage) {
-        match message.action.as_str() {
-            "create" => self.create(message),
-            _ => panic!("Action not implemented"),
-        }
-    }
+    // fn parse_action(&self, message: DbMessage) {
+    //     match message.action.as_str() {
+    //         "create" => self.create(message),
+    //         _ => panic!("Action not implemented"),
+    //     }
+    // }
 
     fn create(&self, message: DbMessage) {
         let possible = CLASSES.iter().any(|item| item == &message.verb);
@@ -68,11 +75,11 @@ fn connect(path: &str) -> Result<Connection> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DbMessage {
-    action: String,
-    verb: String,
-    item: Option<String>,
+    pub action: String,
+    pub verb: String,
+    pub item: Option<String>,
 }
 
 impl DbMessage {

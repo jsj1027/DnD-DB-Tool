@@ -2,6 +2,7 @@ pub mod structs;
 use crate::structs::class;
 use crate::structs::data_connection::DatabaseConnection;
 use std::sync::mpsc::Sender;
+use serde_json::Value;
 
 #[cfg(test)]
 mod tests {
@@ -12,7 +13,7 @@ mod tests {
 }
 
 pub fn get_database_connection(
-    message_channel: Sender<String>,
-) -> (DatabaseConnection, Sender<String>) {
+    message_channel: Sender<Value>,
+) -> (DatabaseConnection, Sender<Value>) {
     DatabaseConnection::new(message_channel)
 }
