@@ -20,12 +20,10 @@ fn main() {
     let matches = App::from(yaml).get_matches();
 
     let (send_channel, receive_channel): (Sender<Value>, Receiver<Value>) = mpsc::channel();
-    // let mut threads: Vec<thread::JoinHandle>;
 
     let connections = setup_database_thread(send_channel.clone());
     let database_thread = connections.0;
 
-    // threads.push(database_thread);
     let send_db_message_channel = connections.1;
 
     let character = match matches.value_of("new") {
