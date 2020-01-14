@@ -1,2 +1,4 @@
 Unsure of why there is a lib.rs file
-I think so there is a clear seperation of front end and backend
+I think so there is a clear seperation of front end and backend?
+But maybe I can just run a binary that is db communication? Info out info in?
+Just starts an inifinite loop that takes in string info and turns it into db commands?

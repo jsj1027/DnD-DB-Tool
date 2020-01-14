@@ -47,7 +47,20 @@ pub struct Class {
     pub cooperative_stat: String,
 }
 
-pub static CLASSES: &'static [&'static str] = &["barbarian","bard","cleric","druid","fighter","monk","paladin","ranger","rogue","sorcerer", "warlock","wizard"];
+pub static CLASSES: &'static [&'static str] = &[
+    "barbarian",
+    "bard",
+    "cleric",
+    "druid",
+    "fighter",
+    "monk",
+    "paladin",
+    "ranger",
+    "rogue",
+    "sorcerer",
+    "warlock",
+    "wizard",
+];
 // impl SqlStructure for Class {
 
 // }

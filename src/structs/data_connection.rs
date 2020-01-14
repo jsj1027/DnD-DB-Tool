@@ -11,7 +11,6 @@ use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
 use std::time::Duration;
 use std::{error, fmt, thread};
 
-
 #[derive(Debug)]
 pub struct DatabaseConnection {
     pub connection: Connection,

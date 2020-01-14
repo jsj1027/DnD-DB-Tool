@@ -16,40 +16,42 @@ use db_lib;
 use db_lib::structs::data_connection::{DatabaseConnection, DbMessage};
 
 fn main() {
-    let yaml = load_yaml!("configuration.yaml");
-    let matches = App::from(yaml).get_matches();
+    // let yaml = load_yaml!("configuration.yaml");
+    // let matches = App::from(yaml).get_matches();
 
-    let (send_channel, receive_channel): (Sender<Value>, Receiver<Value>) = mpsc::channel();
+    // let (send_channel, receive_channel): (Sender<Value>, Receiver<Value>) = mpsc::channel();
 
-    let connections = setup_database_thread(send_channel.clone());
-    let database_thread = connections.0;
+    // let connections = setup_database_thread(send_channel.clone());
+    // let database_thread = connections.0;
 
-    let send_db_message_channel = connections.1;
+    // let send_db_message_channel = connections.1;
 
-    let character = match matches.value_of("new") {
-        Some(character) => character,
+    // let character = match matches.value_of("new") {
+    //     Some(character) => character,
 
-        _ => return,
-    };
+    //     _ => return,
+    // };
 
-    match character {
-        "bard" | "Bard" | "BARD" => {
-            println!("we gonna create a bard");
-            let bard = DbMessage{
-                action: String::from("create"),
-                verb: String::from("bard"),
-                item: Option::None,
-            };
-            let result = send_db_message_channel.send(serde_json::to_value(bard).unwrap());
-            match result {
-                Ok(()) => println!("creating bard"),
-                Err(error) => {
-                    println!("{}", error);
-                }
-            }
-        }
-        _ => println!("Not a creatable class."),
-    }
+    // match character {
+    //     "bard" | "Bard" | "BARD" => {
+    //         println!("we gonna create a bard");
+    //         let bard = DbMessage {
+    //             action: String::from("create"),
+    //             verb: String::from("bard"),
+    //             item: Option::None,
+    //         };
+    //         let result = send_db_message_channel.send(serde_json::to_value(bard).unwrap());
+    //         match result {
+    //             Ok(()) => println!("creating bard"),
+    //             Err(error) => {
+    //                 println!("{}", error);
+    //             }
+    //         }
+    //     }
+    //     _ => println!("Not a creatable class."),
+    // }
+    
+    db_lib::run_loop();
 }
 
 fn setup_database_thread(
