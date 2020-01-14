@@ -4,3 +4,6 @@ But maybe I can just run a binary that is db communication? Info out info in?
 Just starts an inifinite loop that takes in string info and turns it into db commands?
 Set up the db connection, with ability to send messages to it.
 then run event loop which grabs messages and actually sends it over. over stdin. stdin to json I guess?
+Maybe I should just pass around strings instead of json?
+Or maybe just pass around json instead of DB messages as strings passed to json and back and forth.
+Wut?

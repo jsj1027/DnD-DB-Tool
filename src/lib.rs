@@ -1,6 +1,6 @@
 pub mod structs;
 use crate::structs::class;
-use crate::structs::data_connection::DatabaseConnection;
+use crate::structs::data_connection::{DatabaseConnection, DbMessage};
 use serde_json::Value;
 use std::sync::mpsc::Sender;
 
@@ -22,12 +22,18 @@ pub fn get_database_connection(
 
 pub fn run_loop() {
     let mut guess = String::new();
+
     loop {
-        io::stdin().read_line(&mut guess)
-            .expect("failed to read line");    
-        match guess.trim(){
-            "exit" => break,
-            _ => println!("{:#?}", guess.trim()),
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("failed to read line");
+        let message = DbMessage::new(String::from("create_bard"));
+        println!("{:#?}", message);
+        let exit_command = String::from("exit_application");
+        let msg_string = message.to_string();
+        match msg_string.as_ref() {
+            "exit_application" => break,
+            _ => println!("{:#?}", message),
         };
         guess.clear();
     }

@@ -76,33 +76,33 @@ fn connect(path: &str) -> Result<Connection> {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DbMessage {
-    pub action: String,
-    pub verb: String,
-    pub item: Option<String>,
+    action: String,
+    verb: String,
+    item: Option<String>,
 }
 
 impl DbMessage {
-    // fn new(message: String) -> Self {
-    //     let mut message_iter = message.split('_').peekable();
+    pub fn new(message: String) -> Self {
+        let mut message_iter = message.split('_').peekable();
 
-    //     let mut action: String = "action".to_string();
-    //     let mut verb: String = "verb".to_string();
-    //     let mut item: Option<String> = None;
+        let mut action: String = "action".to_string();
+        let mut verb: String = "verb".to_string();
+        let mut item: Option<String> = None;
 
-    //     while message_iter.peek() != None {
-    //         let part = message_iter.next().unwrap().to_lowercase();
-    //         let answer = check_message_part(part.as_str());
-    //         match answer {
-    //             Some("action") => action = part.to_string(),
-    //             Some("verb") => verb = part.to_string(),
-    //             Some("item") => item = Some(part.to_string()),
-    //             None => item = None,
-    //             Some(_) => panic!("Unusable option"),
-    //         }
-    //     }
+        while message_iter.peek() != None {
+            let part = message_iter.next().unwrap().to_lowercase();
+            let answer = check_message_part(part.as_str());
+            match answer {
+                Some("action") => action = part.to_string(),
+                Some("verb") => verb = part.to_string(),
+                Some("item") => item = Some(part.to_string()),
+                None => item = None,
+                Some(_) => panic!("Unusable option"),
+            }
+        }
 
-    //     DbMessage { action, verb, item }
-    // }
+        DbMessage { action, verb, item }
+    }
 }
 
 impl fmt::Display for DbMessage {
@@ -138,16 +138,20 @@ impl FromStr for DbMessage {
     }
 }
 
-pub fn check_message_part(part: &str) -> std::option::Option<&str> {
-    let actions = vec!["create"];
-    let verbs = vec!["bard"];
+fn check_message_part(part: &str) -> std::option::Option<&str> {
+    let actions = vec!["create, exit"];
+    let verbs = vec!["bard, application"];
     let items = vec!["item"];
 
+    println!("{:#?}", part);
     if actions.iter().any(|item| item == &part) {
+        println!("action: {:#?}", part);
         Some("action")
     } else if verbs.iter().any(|item| item == &part) {
+        println!("verb: {:#?}", part);
         Some("verb")
     } else if items.iter().any(|item| item == &part) {
+        println!("item: {:#?}", part);
         Some("item")
     } else {
         None

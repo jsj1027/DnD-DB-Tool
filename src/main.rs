@@ -50,7 +50,7 @@ fn main() {
     //     }
     //     _ => println!("Not a creatable class."),
     // }
-    
+
     db_lib::run_loop();
 }
 
