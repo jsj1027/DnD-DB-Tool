@@ -89,17 +89,28 @@ impl DbMessage {
         let mut verb: String = "verb".to_string();
         let mut item: Option<String> = None;
 
-        while message_iter.peek() != None {
-            let part = message_iter.next().unwrap().to_lowercase();
-            let answer = check_message_part(part.as_str());
-            match answer {
+        let mut count = 3;
+        message_iter.for_each(
+            |part| match check_message_part(part.to_lowercase().as_str()) {
                 Some("action") => action = part.to_string(),
                 Some("verb") => verb = part.to_string(),
                 Some("item") => item = Some(part.to_string()),
                 None => item = None,
                 Some(_) => panic!("Unusable option"),
-            }
-        }
+            },
+        );
+
+        // {
+        //     let part = message_iter.next().unwrap().to_lowercase();
+        //     let answer = check_message_part(part.as_str());
+        //     match answer {
+        //         Some("action") => action = part.to_string(),
+        //         Some("verb") => verb = part.to_string(),
+        //         Some("item") => item = Some(part.to_string()),
+        //         None => item = None,
+        //         Some(_) => panic!("Unusable option"),
+        //     }
+        // }
 
         DbMessage { action, verb, item }
     }
@@ -108,6 +119,7 @@ impl DbMessage {
 impl fmt::Display for DbMessage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let item = self.item.clone();
+        // println!("{} {}", self.action, self.verb);
         match item {
             Some(_) => write!(f, "{}_{}_{}", self.action, self.verb, item.unwrap()),
             None => write!(f, "{}_{} ", self.action, self.verb),
@@ -143,7 +155,8 @@ fn check_message_part(part: &str) -> std::option::Option<&str> {
     let verbs = vec!["bard, application"];
     let items = vec!["item"];
 
-    println!("{:#?}", part);
+    println!("incheckpart: {:#?}", part);
+
     if actions.iter().any(|item| item == &part) {
         println!("action: {:#?}", part);
         Some("action")

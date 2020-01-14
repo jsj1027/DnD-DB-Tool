@@ -27,14 +27,15 @@ pub fn run_loop() {
         io::stdin()
             .read_line(&mut guess)
             .expect("failed to read line");
-        let message = DbMessage::new(String::from("create_bard"));
+        let message = DbMessage::new(guess.trim().to_string().clone());
         println!("{:#?}", message);
         let exit_command = String::from("exit_application");
         let msg_string = message.to_string();
-        match msg_string.as_ref() {
+
+        match msg_string.trim() {
             "exit_application" => break,
-            _ => println!("{:#?}", message),
+            _ => break, //println!("{:#?}", message),
         };
-        guess.clear();
+        // guess.clear();
     }
 }
