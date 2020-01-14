@@ -7,3 +7,4 @@ then run event loop which grabs messages and actually sends it over. over stdin.
 Maybe I should just pass around strings instead of json?
 Or maybe just pass around json instead of DB messages as strings passed to json and back and forth.
 Wut?
+check message part fails when multiple things are added to the vectors.
