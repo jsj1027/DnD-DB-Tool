@@ -28,14 +28,13 @@ pub fn run_loop() {
             .read_line(&mut guess)
             .expect("failed to read line");
         let message = DbMessage::new(guess.trim().to_string().clone());
-        println!("{:#?}", message);
         let exit_command = String::from("exit_application");
         let msg_string = message.to_string();
 
         match msg_string.trim() {
             "exit_application" => break,
-            _ => break, //println!("{:#?}", message),
+            _ => println!("{:#?}", message),
         };
-        // guess.clear();
+        guess.clear();
     }
 }
