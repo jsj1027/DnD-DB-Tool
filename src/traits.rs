@@ -14,3 +14,8 @@ pub trait SqlStructure {
         
     fn get_new_attribute(attribute: str) -> String;
 }
+
+pub trait Get{}
+pub trait PUT{}
+pub trait POST {}
+pub trait DELETE {}
