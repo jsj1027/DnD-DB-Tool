@@ -8,3 +8,9 @@ Maybe I should just pass around strings instead of json?
 Or maybe just pass around json instead of DB messages as strings passed to json and back and forth.
 Wut?
 check message part fails when multiple things are added to the vectors.
+FIxed check message part
+Rest API ideas, look here: https://www.codementor.io/@sagaragarwal94/building-a-basic-restful-api-in-python-58k02xsiq
+You can do GET PUT POST DELETE traits rest api calls for different structs. sound good? maybe lol. You might need trait return generics? trait input generics?
+Creates a fake? rest api? lol is that a crate idea? Maybe, its something to look at.
+Could it go a step futrher a be used for microservices? Maybe, built out with a yaml file for ease of use? maybe
+Return type specified? Maybe
