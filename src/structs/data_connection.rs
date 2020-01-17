@@ -11,6 +11,9 @@ use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
 use std::time::Duration;
 use std::{error, fmt, thread};
 
+static ACTIONS: [&str; 2] = ["create", "exit"];
+
+
 #[derive(Debug)]
 pub struct DatabaseConnection {
     pub connection: Connection,
@@ -36,7 +39,7 @@ impl DatabaseConnection {
         while check {
             match self.intake_channel.try_recv() {
                 Ok(message) => {
-                    let message: DbMessage = serde_json::from_value(message).unwrap();
+                    // let message: DbMessage = serde_json::from_value(message).unwrap();
                     println!("message: {}", message);
                     // self.parse_action(message);
                 }
@@ -141,7 +144,7 @@ fn check_message_part(part: &str) -> std::option::Option<&str> {
     let nouns = vec!["bard", "application"];
     let items = vec!["item"];
 
-    if actions.iter().any(|item| item == &part) {
+    if ACTIONS.iter().any(|item| item == &part) {
         Some("action")
     } else if nouns.iter().any(|item| item == &part) {
         Some("noun")

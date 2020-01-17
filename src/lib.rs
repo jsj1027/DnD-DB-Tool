@@ -1,10 +1,8 @@
 pub mod structs;
-use crate::structs::class;
 use crate::structs::data_connection::{DatabaseConnection, DbMessage};
 use serde_json::Value;
-use std::sync::mpsc::Sender;
-
 use std::io;
+use std::sync::mpsc::Sender;
 
 #[cfg(test)]
 mod tests {
@@ -20,21 +18,21 @@ pub fn get_database_connection(
     DatabaseConnection::new(message_channel)
 }
 
-pub fn run_loop() {
+pub fn run_loop(send_message_channel: Sender<Value>) {
     let mut guess = String::new();
-
     loop {
         io::stdin()
             .read_line(&mut guess)
             .expect("failed to read line");
-        let message = DbMessage::new(guess.trim().to_string().clone());
-        let exit_command = String::from("exit_application");
-        let msg_string = message.to_string();
+        let message = DbMessage::new(guess.trim().to_string());
+        let message_json = serde_json::to_value(message).unwrap();
+        send_message_channel.send(message_json);
+        // let exit_command = String::from("exit_application");
 
-        match msg_string.trim() {
-            "exit_application" => break,
-            _ => println!("{:#?}", message),
-        };
+        // match msg_string.trim() {
+        //     "exit_application" => break,
+        //     _ => println!("{:#?}", message),
+        // };
         guess.clear();
     }
 }

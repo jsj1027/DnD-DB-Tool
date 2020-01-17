@@ -1,7 +1,3 @@
-#[macro_use]
-extern crate clap;
-use clap::App;
-
 mod structs;
 
 use std::sync::mpsc;
@@ -16,21 +12,14 @@ use db_lib;
 use db_lib::structs::data_connection::{DatabaseConnection, DbMessage};
 
 fn main() {
-    // let yaml = load_yaml!("configuration.yaml");
-    // let matches = App::from(yaml).get_matches();
+    let (send_channel, receive_channel): (Sender<Value>, Receiver<Value>) = mpsc::channel();
 
-    // let (send_channel, receive_channel): (Sender<Value>, Receiver<Value>) = mpsc::channel();
-
-    // let connections = setup_database_thread(send_channel.clone());
+    let connections = setup_database_thread(send_channel.clone());
     // let database_thread = connections.0;
 
-    // let send_db_message_channel = connections.1;
+    let send_db_message_channel = connections.1;
 
-    // let character = match matches.value_of("new") {
-    //     Some(character) => character,
-
-    //     _ => return,
-    // };
+    db_lib::run_loop(send_db_message_channel);
 
     // match character {
     //     "bard" | "Bard" | "BARD" => {
@@ -50,8 +39,6 @@ fn main() {
     //     }
     //     _ => println!("Not a creatable class."),
     // }
-
-    db_lib::run_loop();
 }
 
 fn setup_database_thread(

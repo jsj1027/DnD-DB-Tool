@@ -15,7 +15,15 @@ pub trait SqlStructure {
     fn get_new_attribute(attribute: str) -> String;
 }
 
-pub trait Get{}
-pub trait PUT{}
-pub trait POST {}
-pub trait DELETE {}
+pub trait Get{
+    pub fn get();
+}
+pub trait PUT{
+    pub fn put();
+}
+pub trait POST {
+    pub fn post();
+}
+pub trait DELETE {
+    pub fn delete();
+}
