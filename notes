@@ -14,3 +14,4 @@ You can do GET PUT POST DELETE traits rest api calls for different structs. soun
 Creates a fake? rest api? lol is that a crate idea? Maybe, its something to look at.
 Could it go a step futrher a be used for microservices? Maybe, built out with a yaml file for ease of use? maybe
 Return type specified? Maybe
+Professor recommended I focus on my structs

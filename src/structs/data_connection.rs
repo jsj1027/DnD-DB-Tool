@@ -13,7 +13,6 @@ use std::{error, fmt, thread};
 
 static ACTIONS: [&str; 2] = ["create", "exit"];
 
-
 #[derive(Debug)]
 pub struct DatabaseConnection {
     pub connection: Connection,
