@@ -18,7 +18,6 @@ fn main() {
     // let database_thread = connections.0;
 
     let send_db_message_channel = connections.1;
-
     db_lib::run_loop(send_db_message_channel);
 
     // match character {

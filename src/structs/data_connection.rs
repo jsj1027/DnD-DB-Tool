@@ -33,6 +33,12 @@ impl DatabaseConnection {
         (connection, db_output_channel)
     }
 
+    pub fn new_test() -> Connection {
+        let path = "./data/dnd.db";
+        let connection = connect(&path).unwrap();
+        connection
+    }
+
     pub fn run(&self) {
         let check = true;
         while check {
