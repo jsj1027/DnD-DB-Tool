@@ -4,17 +4,17 @@ use std::cmp::Eq;
 
 #[derive(Debug, Eq)]
 pub struct Class {
-    pub name: String,
-    pub primary_stat: String,
-    pub secondary_stat: String,
-    pub alternative_stat: String,
-    pub cooperative_stat: String,
+    name: String,
+    primary_stat: String,
+    secondary_stat: String,
+    alternative_stat: String,
+    cooperative_stat: String,
 }
 
 impl Class {
     pub fn new(database_connection: &Connection, class_name: &str) -> Self {
         let prepared_statement =
-            String::from("SELECT * FROM Class WHERE name='") + &class_name + "'";
+            String::from("SELECT name, primaryStat, secondaryStat, cooperativeStat, alternativeStat FROM Class WHERE name='") + &class_name + "'";
 
         let mut statement: Statement = match database_connection.prepare(&prepared_statement) {
             Ok(statement) => statement,
@@ -44,7 +44,7 @@ impl Class {
     pub fn random(database_connection: &Connection) -> Self {
         let class_name: String = get_random_class_name();
         let prepared_statement =
-            String::from("SELECT * FROM Class WHERE name='") + &class_name + "'";
+            String::from("SELECT name, primaryStat, secondaryStat, cooperativeStat, alternativeStat FROM Class WHERE name='") + &class_name + "'";
 
         let mut statement: Statement = database_connection.prepare(&prepared_statement).unwrap();
         let row: Result<Class, Error> = statement.query_row(NO_PARAMS, |row| {
