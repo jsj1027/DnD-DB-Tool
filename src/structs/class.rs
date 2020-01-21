@@ -1,8 +1,9 @@
 use rand::prelude::*;
 use rusqlite::{Connection, Error, Statement, NO_PARAMS};
+use serde::{Deserialize, Serialize};
 use std::cmp::Eq;
 
-#[derive(Debug, Eq)]
+#[derive(Debug, Eq, Serialize, Deserialize)]
 pub struct Class {
     name: String,
     primary_stat: String,

@@ -1,8 +1,11 @@
 use crate::structs::data_connection::DatabaseConnection;
+use crate::structs::status::Ability_Score_Bonus;
 use rand::{thread_rng, Rng};
 use rusqlite::{Connection, Statement, NO_PARAMS};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum Size {
     Tiny,
     Small,
@@ -10,20 +13,21 @@ pub enum Size {
     Large,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Race {
     pub name: String,
-    pub age: i32,
+    pub age: u32,
     pub height: f64,
     pub size: Size,
-    pub speed: i32,
+    pub speed: u32,
     pub languages: Vec<String>,
-    pub proficienes: Vec<String>,
-    pub stat_bonus: Vec<String>,
+    pub weapon_proficiencies: Vec<String>,
+    pub tool_proficiencies: Vec<String>,
+    pub stat_bonuses: Vec<Ability_Score_Bonus>,
 }
 
 impl Race {
-    pub fn new(database_connection: &Connection, race_name: &str) {
+    pub fn new(database_connection: &Connection, race_name: &str) -> Self {
         let prepared_statement = String::from("SELECT * FROM Race WHERE name='") + &race_name + "'";
 
         let mut statement: Statement = match database_connection.prepare(&prepared_statement) {
@@ -34,24 +38,28 @@ impl Race {
             ),
         };
         let race = match statement.query_row(NO_PARAMS, |row| {
-            let measurements = Race::parse_size(row.get(1)?, row.get(2)?);
+            let measurements = Race::get_size_and_height(row.get(1)?, row.get(2)?);
             let height = measurements.0;
             let size = measurements.1;
 
             let age = Race::get_age(row.get(4)?, row.get(5)?);
 
-            println!("height: {}, size: {:#?}, age: {}", height, size, age);
-            Ok(32)
-            // Ok(Race {
-            //     name: row.get(0)?,
-            //     size,
-            //     age,
-            //     height,
-            //     speed: row.get(3)?,
-            //     languages: row.get(4)?,
-            //     proficienes: row.get(4)?,
-            //     stat_bonus: row.get(4)?,
-            // })
+            let languages = Race::compose_languages(row.get(6)?);
+            let weapon_proficiencies: Vec<String> = Race::get_weapon_proficiencies(row.get(9)?);
+            let tool_proficiencies: Vec<String> = Race::get_tool_proficiencies(row.get(10)?);
+            let stat_bonuses = Race::get_stat_bonuses(row.get(11)?);
+            // Ok(32)
+            Ok(Race {
+                name: row.get(0)?,
+                size,
+                age,
+                height,
+                speed: row.get(3)?,
+                languages: languages,
+                weapon_proficiencies,
+                tool_proficiencies,
+                stat_bonuses,
+            })
         }) {
             Ok(race) => race,
             Err(error) => panic!(
@@ -59,10 +67,10 @@ impl Race {
                 &race_name, error
             ),
         };
-        // race
+        race
     }
 
-    fn parse_size(minimum_size: f64, maximum_size: f64) -> (f64, Size) {
+    fn get_size_and_height(minimum_size: f64, maximum_size: f64) -> (f64, Size) {
         let mut rng = thread_rng();
         let height: f64 = rng.gen_range(minimum_size, maximum_size);
 
@@ -82,131 +90,72 @@ impl Race {
         (height, size)
     }
 
-    fn get_age(minimum_age: i32, maximum_age: i32) -> i32 {
+    fn get_age(minimum_age: u32, maximum_age: u32) -> u32 {
         let mut rng = thread_rng();
-        let age: i32 = rng.gen_range(minimum_age, maximum_age);
+        let age: u32 = rng.gen_range(minimum_age, maximum_age);
         age
+    }
+
+    fn compose_languages(language: String) -> Vec<String> {
+        vec![String::from("Common"), language]
+    }
+
+    fn get_weapon_proficiencies(unparsed_weapon_proficiencies: String) -> Vec<String> {
+        let json_value: Value = match serde_json::from_str(&unparsed_weapon_proficiencies) {
+            Ok(json_value) => json_value,
+            Err(error) => panic!(
+                "DB weaponProf section is not in proper json format. Resulting in error: {:#?}",
+                error
+            ),
+        };
+        let vectorized_weapon_proficiencies: Vec<String> =
+            match serde_json::from_value(json_value["weapons"].clone()) {
+                Ok(vectored_weapon_section) => vectored_weapon_section,
+                Err(error) => panic!(
+                    "DB race weaponProf section missing weapons section. Resulting in error: {:#?}",
+                    error
+                ),
+            };
+        vectorized_weapon_proficiencies
+    }
+
+    fn get_tool_proficiencies(unparsed_tool_proficiencies: String) -> Vec<String> {
+        let json_value: Value = match serde_json::from_str(&unparsed_tool_proficiencies) {
+            Ok(json_value) => json_value,
+            Err(error) => panic!(
+                "DB toolProf section is not in proper json format. Resulting in error: {:#?}",
+                error
+            ),
+        };
+        let vectorized_tool_proficiencies: Vec<String> =
+            match serde_json::from_value(json_value["tools"].clone()) {
+                Ok(vectored_tool_section) => vectored_tool_section,
+                Err(error) => panic!(
+                    "DB race toolProf section missing tools section. Resulting in error: {:#?}",
+                    error
+                ),
+            };
+        vectorized_tool_proficiencies
+    }
+
+    fn get_stat_bonuses(unparsed_stat_bonuses: String) -> Vec<Ability_Score_Bonus> {
+        let json_value: Value = match serde_json::from_str(&unparsed_stat_bonuses) {
+            Ok(json_value) => json_value,
+            Err(error) => panic!(
+                "DB toolProf section is not in proper json format. Resulting in error: {:#?}",
+                error
+            ),
+        };
+        let vectorized_stat_bonus_json: Vec<Value> =
+            serde_json::from_value(json_value["stat_bonuses"].clone()).unwrap();
+        let mut vectorized_ability_score_bonus: Vec<Ability_Score_Bonus> = Vec::new();
+        for stat_bonus_value in vectorized_stat_bonus_json {
+            &vectorized_ability_score_bonus.push(serde_json::from_value(stat_bonus_value).unwrap());
+        }
+        vectorized_ability_score_bonus
     }
 }
 
-// impl Race {
-//     pub fn new() -> Race {
-//         let data_base = DatabaseConnection::new();
-//         let name = get_name(&data_base);
-//         let formatted_name = get_formatted_name(&name);
-//         Race {
-//             speed: get_speed(&formatted_name, &data_base),
-//             age: get_age(&formatted_name, &data_base),
-//             languages: get_language(&formatted_name, &data_base),
-//             proficienes: get_proficienes(&formatted_name, &data_base),
-//             size: get_size(&formatted_name, &data_base),
-//             stat_bonus: get_stat_bonus(&formatted_name, &data_base),
-//             name: name,
-//         }
-//     }
-// }
+// impl SqlStructure for Class {
 
-// fn get_name(data_base: &DatabaseConnection) -> String {
-//     let query = String::from("SELECT name FROM Race");
-//     let mut statement: Statement = data_base.connection.prepare(&query[..]).unwrap();
-//     let rows = statement.query_map(NO_PARAMS, |row| row.get(0)).unwrap();
-//     let mut results: Vec<String> = Vec::new();
-//     for row in rows {
-//         results.push(row.unwrap());
-//     }
-//     let mut rng = thread_rng();
-//     let index = rng.gen_range(0, results.len());
-//     String::from(&results[index])
-// }
-
-// fn get_formatted_name(unformatted_name: &str) -> String {
-//     let mut base = String::from("''");
-//     base.insert_str(1, unformatted_name);
-//     base
-// }
-
-// fn get_speed(race_name: &String, data_base: &DatabaseConnection) -> i32 {
-//     let mut query: String = String::from("SELECT speed FROM Race WHERE name=");
-//     query.push_str(&race_name);
-//     let mut statement: Statement = data_base.connection.prepare(&query[..]).unwrap();
-//     let mut rows = statement.query(NO_PARAMS).unwrap();
-//     let speed: i32 = rows.next().unwrap().unwrap().get_unwrap(0);
-//     speed
-// }
-
-// fn get_age(race_name: &String, data_base: &DatabaseConnection) -> i32 {
-//     let mut query: String = String::from("SELECT minAge, maxAge FROM Race WHERE name=");
-//     query.push_str(&race_name);
-//     let mut statement: Statement = data_base.connection.prepare(&query[..]).unwrap();
-//     let mut rows = statement.query(NO_PARAMS).unwrap();
-//     let row = rows.next().unwrap().unwrap();
-//     let min_age: i32 = row.get_unwrap(0);
-//     let max_age: i32 = row.get_unwrap(1);
-//     let mut rng = thread_rng();
-//     let age = rng.gen_range(min_age, max_age);
-//     age
-// }
-
-// fn get_language(race_name: &str, data_base: &DatabaseConnection) -> Vec<String> {
-//     let mut query: String = String::from("SELECT languages FROM Race WHERE name=");
-//     query.push_str(&race_name);
-//     let mut statement: Statement = data_base.connection.prepare(&query[..]).unwrap();
-//     let mut rows = statement.query(NO_PARAMS).unwrap();
-//     let languages: String = rows.next().unwrap().unwrap().get_unwrap(0);
-//     vec![String::from("Common"), languages]
-// }
-
-// fn get_proficienes(race_name: &str, data_base: &DatabaseConnection) -> Vec<String> {
-//     let mut query: String = String::from("SELECT weaponProf, toolProf FROM Race WHERE name=");
-//     query.push_str(&race_name);
-//     let mut statement: Statement = data_base.connection.prepare(&query[..]).unwrap();
-//     let mut rows = statement.query(NO_PARAMS).unwrap();
-//     let row = rows.next().unwrap().unwrap();
-//     let weapon_prof: String = row.get_unwrap(0);
-//     let tool_prof: String = row.get_unwrap(1);
-//     vec![weapon_prof, tool_prof]
-// }
-
-// fn get_size(race_name: &str, data_base: &DatabaseConnection) -> (Size, f64) {
-//     let mut query: String = String::from("SELECT minSize, maxSize FROM Race WHERE name=");
-//     query.push_str(&race_name);
-//     let mut statement: Statement = data_base.connection.prepare(&query[..]).unwrap();
-//     let mut rows = statement.query(NO_PARAMS).unwrap();
-//     let row = rows.next().unwrap().unwrap();
-
-//     let min_size: f64 = row.get_unwrap(0);
-//     let max_size: f64 = row.get_unwrap(1);
-
-//     let mut rng = thread_rng();
-//     let size_number: f64 = rng.gen_range(min_size, max_size);
-
-//     let tiny_start: f64 = 1.0;
-//     let tiny_end: f64 = 1.9;
-//     let small_start: f64 = 2.0;
-//     let small_end: f64 = 3.9;
-//     let medium_start: f64 = 4.0;
-//     let medium_end: f64 = 7.9;
-//     let large_start: f64 = 8.0;
-//     let large_end: f64 = 15.9;
-
-//     if size_number >= tiny_start && size_number <= tiny_end {
-//         (Size::Tiny, size_number)
-//     } else if size_number >= small_start && size_number <= small_end {
-//         (Size::Small, size_number)
-//     } else if size_number >= medium_start && size_number <= medium_end {
-//         (Size::Medium, size_number)
-//     } else if size_number >= large_start && size_number <= large_end {
-//         (Size::Large, size_number)
-//     } else {
-//         (Size::Large, size_number)
-//     }
-// }
-
-// fn get_stat_bonus(race_name: &str, data_base: &DatabaseConnection) -> String {
-//     let mut query: String = String::from("SELECT statBonus FROM Race WHERE name=");
-//     query.push_str(&race_name);
-//     let mut statement: Statement = data_base.connection.prepare(&query[..]).unwrap();
-//     let mut rows = statement.query(NO_PARAMS).unwrap();
-//     let stats: String = rows.next().unwrap().unwrap().get_unwrap(0);
-//     stats
 // }

@@ -1,4 +1,26 @@
 // use rand::prelude::{thread_rng, Rng, ThreadRng};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Ability_Score {
+    pub score_name: String,
+    pub score_base_number: u32,
+    pub score_mod: i32,
+}
+
+impl Ability_Score {
+    pub fn new() {}
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Ability_Score_Bonus {
+    pub score_name: String,
+    pub score_mod: i32,
+}
+
+impl Ability_Score_Bonus {
+    pub fn new() {}
+}
 
 // #[derive(Debug)]
 // pub struct Status {
