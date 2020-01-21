@@ -43,7 +43,7 @@ impl Class {
     }
 
     pub fn random(database_connection: &Connection) -> Self {
-        let class_name: String = get_random_class_name();
+        let class_name: String = super::class::get_random_class_name();
         let prepared_statement =
             String::from("SELECT name, primaryStat, secondaryStat, cooperativeStat, alternativeStat FROM Class WHERE name='") + &class_name + "'";
 
@@ -71,7 +71,7 @@ impl PartialEq for Class {
 
 // }
 
-pub fn get_random_class_name() -> String {
+fn get_random_class_name() -> String {
     let mut rng_instance = rand::thread_rng();
     let random_class_number = rng_instance.gen_range(0, NUM_OF_CLASSES - 1);
     let class_name = CLASSES[random_class_number];
@@ -96,7 +96,8 @@ pub static CLASSES: &'static [&'static str] = &[
 pub static NUM_OF_CLASSES: usize = CLASSES.len();
 #[cfg(test)]
 mod tests {
-    use crate::structs::class::{get_random_class_name, Class, CLASSES};
+    use super::get_random_class_name;
+    use crate::structs::class::{Class, CLASSES};
     use crate::structs::data_connection::DatabaseConnection;
     use rusqlite::Connection;
 

@@ -42,6 +42,8 @@ fn main() {
     let connection = DatabaseConnection::new_test();
     let race_name = "Dwarf";
     Race::new(&connection, &race_name);
+    let random_race = Race::random(&connection);
+    println!("{:#?}", random_race);
 }
 
 // fn setup_database_thread(
