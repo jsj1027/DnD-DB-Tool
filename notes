@@ -17,3 +17,4 @@ Return type specified? Maybe
 Professor recommended I focus on my structs
 Class now has all the proper tests
 Working on tests for race now. Just gotta do the Vec<String> parsing to be able to actually get a race, in order to do my testing.
+Huh wasn't actually done with race, but I am now. So lets move to writting tests for race.

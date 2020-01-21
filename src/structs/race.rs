@@ -159,3 +159,6 @@ impl Race {
 // impl SqlStructure for Class {
 
 // }
+
+#[cfg(test)]
+mod tests {}
